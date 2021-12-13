@@ -1,16 +1,31 @@
-const express = require('express')
-//const h = require('bcryptjs')
-const app = express()
-app.use(express.json())
-
-const userRouter = require('../routes/userRoute')
-app.use(userRouter)
-
-const PORT = process.env.PORT || 3000
+const app = require('./app.js')
+const PORT = process.env.PORT
 
 app.listen(PORT , () => {
     console.log('running on port ' + PORT)
 })
+
+// const fs = require('fs')
+// fs.writeFileSync('index.txt' , '5ytgefd5tgefd4tgrfd')
+//  function t(n){
+// return n }
+
+// const book = {
+//     title: 'Ego is the Enemy',
+//     author: 'Ryan Holiday'
+//    }
+//    // Covert JavaScript object into JSON string
+//    const bookJSON = JSON.stringify(book)
+//    console.log(JSON.parse(bookJSON))
+
+// let a = [1,2,3,6,5,4,7,8,9]
+// const r = a.findIndex( (i) => {
+//      return i >3
+    
+
+// })
+// console.log(r)
+
 
 // app.set('views', path.join(__dirname, 'views'))
 // app.set('view engine', 'ejs')

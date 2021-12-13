@@ -21,7 +21,7 @@ function Singnup (){
 Singnup()
 
 function login(){
-    userRouter.post('/login' , auth , async(req,res) => {
+    userRouter.post('/login' , async(req,res) => {
         try{
             const user = await Users.findUser(req.body.email , req.body.password)
             const token = await user.generateAuthToken()
@@ -35,8 +35,9 @@ function login(){
 login()
 
 // userRouter.get('/t' , async (req,res) => {
-//     const t = await Users.countDocuments({role : "USER".toLocaleLowerCase()})
-//     res.json(t)
+//     //Users called filter and findOne called query
+//     const query = await Users.find();
+//     res.send(query)
 // })
 
 
@@ -71,6 +72,93 @@ function logoutAll () {
 }
 
 logoutAll ()
+
+
+function getProfile(){
+    userRouter.get('/users/profile' , auth , async (req , res) => {
+        try{
+            res.status(200).send(req.user)
+        }catch(e){
+            res.status(500).send(e)
+        }
+    })
+}
+
+getProfile()
+
+function deleteProfile(){
+    userRouter.delete('/users/profile' , auth , async (req , res) => {
+        try{
+            await req.user.remove()
+            await res.status(200).send(req.user)
+        }catch(e){
+            res.status(500).send(e)
+        }
+    })
+}
+
+deleteProfile()
+
+function updateProfile(){
+    userRouter.patch('/users' , auth , async (req , res) => {
+        const keys = Object.keys(req.body)
+        const allowsUpdates = ['name' , 'email' , 'phoneNumber' , 'password']
+        //ckeck weather every key is exsited in allows array or not
+        //every member in keys array must pass the exam
+        // that it is existed in allow updates
+        const valid = keys.every((update) => allowsUpdates.includes(update))
+        if(!valid){
+            return res.status(500).send({error : 'invalid updates'})
+        }else{
+            keys.forEach( (update) => {
+                res.user[update] = req.body[update]
+            })
+            try{
+                await req.user.save()
+                res.status(200).send(req.user)
+            }catch(e){
+                res.status(400).send(e)
+            }
+        }
+    })
+
+}
+
+updateProfile()
+
+function updateProduct(){
+    userRouter.get('/products/:id' , auth , async (req, res) => {
+        try{
+            const product = await Products.findOne({_id : req.params.id , vendor : req.user._id})
+            if(!product){
+                return res.status(404).send()
+            }else{
+                const keys = Object.keys(req.body)
+                const allowsUpdates = ['name' , 'price' , 'datails']
+                const valid = keys.every( (update) => allowsUpdates.includes(update))
+                
+                // valid.forEach( (update) => {
+                //     valid[update] = req.body[update]
+                // })
+            }
+
+        }catch(e){
+            res.status(400).send(e)
+        }
+
+    })
+
+}
+
+updateProduct()
+
+function getAllProducts(){
+
+}
+
+getAllProducts()
+
+
 
 
 function makeAnOrder () {
