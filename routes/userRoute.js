@@ -1,4 +1,6 @@
 const express = require('express')
+const multer = require('multer')
+const sharp = require('sharp')
 const Users = require('../models/user')
 const Products = require('../models/product')
 const Orders = require('../models/order')
@@ -73,6 +75,49 @@ function logoutAll () {
 
 logoutAll ()
 
+const upload = multer({
+    limits : {
+        fileSize : 5000000
+    } , fileFilter (req , file , cb) {
+        if(!file.originalname.match(/\.(jpg|jpes|png)$/)){
+            return cb(new Error('picture format not matched , please upload jpg,jpes or png image'))
+        }
+        cb(undefined , true)
+    }
+})
+
+
+function uploadProfilePic(){
+    userRouter.post('/profile/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
+        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
+        req.user.profile_picture = pic
+      //  req.actor.doesHavePicture = true
+        await req.user.save()
+        res.status(200).send()
+    } , (error , req , res , next) => {
+        res.status(400).send({error : error.message})
+    })
+} 
+
+uploadProfilePic()
+
+
+function getProfilePic(){
+    userRouter.get('/profile/profilepicture/:id' , async (req, res) => {
+        try{
+            const user = await Users.findById(req.params.id)
+            if(!user && !user.profile_picture){
+                return res.status(404).send()
+            }
+            res.status(200).send(user.profile_picture)
+        }catch(e){
+        res.status(400).send(e)
+        }
+    })
+}
+
+getProfilePic()
+
 
 function getProfile(){
     userRouter.get('/users/profile' , auth , async (req , res) => {
@@ -99,6 +144,22 @@ function deleteProfile(){
 
 deleteProfile()
 
+
+function deleteProfilePicture(){
+    userRouter.delete('/profile/profilepicture' , auth , async (req , res) => {
+        try{
+            req.user.profile_picture = undefined
+            await req.user.save()
+            await res.status(200).send(req.user)
+        }catch(e){
+            res.status(500).send(e)
+        }
+    })
+}
+
+deleteProfilePicture()
+
+
 function updateProfile(){
     userRouter.patch('/users' , auth , async (req , res) => {
         const keys = Object.keys(req.body)
@@ -108,89 +169,12 @@ function updateProfile(){
         // that it is existed in allow updates
         const valid = keys.every((update) => allowsUpdates.includes(update))
         if(!valid){
-            return res.status(500).send({error : 'invalid updates'})
-        }else{
+            return res.status(500).send('invalid updates')
+        }
+        try{
             keys.forEach( (update) => {
-                res.user[update] = req.body[update]
+                req.user[update] = req.body[update]
             })
-            try{
-                await req.user.save()
-                res.status(200).send(req.user)
-            }catch(e){
-                res.status(400).send(e)
-            }
-        }
-    })
-
-}
-
-updateProfile()
-
-function updateProduct(){
-    userRouter.get('/products/:id' , auth , async (req, res) => {
-        try{
-            const product = await Products.findOne({_id : req.params.id , vendor : req.user._id})
-            if(!product){
-                return res.status(404).send()
-            }else{
-                const keys = Object.keys(req.body)
-                const allowsUpdates = ['name' , 'price' , 'datails']
-                const valid = keys.every( (update) => allowsUpdates.includes(update))
-                
-                // valid.forEach( (update) => {
-                //     valid[update] = req.body[update]
-                // })
-            }
-
-        }catch(e){
-            res.status(400).send(e)
-        }
-
-    })
-
-}
-
-updateProduct()
-
-function getAllProducts(){
-
-}
-
-getAllProducts()
-
-
-
-
-function makeAnOrder () {
-    userRouter.post('/order/:id' , auth , async (req , res) => {
-        try{
-            const product = await Products.findOne({_id : req.params.id})
-            if(!product){
-                res.status(404).send('Product Not Found')
-            }
-            const order = new Orders({
-                user : req.user._id , 
-                product : req.params.id
-            })
-            await order.save()
-            res.status(201).send(order)
-        }catch(e){
-            res.status(400).send(e)
-        }
-    })
-
-}
-
-makeAnOrder ()
-
-function addToCart(){
-    userRouter.post('/carts/:id' , auth , async (req , res)=> {
-        try{
-            const product = await Products.findOne({_id : req.params.id})
-            if(!product){
-                throw new Error ('Product Not Found!')
-            }
-            req.user.carts = req.user.carts.concat({cart : req.params.id})
             await req.user.save()
             res.status(200).send(req.user)
         }catch(e){
@@ -198,84 +182,8 @@ function addToCart(){
         }
     })
 }
+updateProfile()
 
-addToCart()
-
-function deleteCart(){
-    userRouter.delete('/carts/:id' , auth , async (req , res) => {
-        try{
-            req.user.carts = req.user.carts.filter( (cart) => {
-                return cart._id != req.params.id
-            })
-            await req.user.save()
-            res.status(200).send(req.user.carts)
-        }catch(e){
-            res.status(400).send()
-        }
-    })
-    
-}
-
-deleteCart()
-
-function AddProduct(){
-    userRouter.post('/products' , auth , async (req , res) => {
-        try{
-            if(req.user.role === 'vendor'){
-                const product = new Products({
-                    ...req.body , 
-                    vendor : req.user._id
-                })
-                await product.save()
-                res.status(201).send(product)
-            }else{
-                res.status(401).send('Sorry! Only Vendor Can Add a Product')
-            }
-        }catch(e){
-            res.status(400).send(e)
-        }
-    })
-
-}
-
-AddProduct()
-
-
-
-function deleteProduct(){
-    userRouter.delete('/products/:id' , auth , async (req , res) => {
-        try{
-            const product = await Products.findOne({_id : req.params.id , vendor : req.user._id})
-            if(!product){
-                res.status(404).send('Product Not Found!')
-            }else{
-                await product.remove()
-                res.status(200).send(product)
-            }
-        }catch(e){
-            res.status(400).send(e)
-        }
-    })
-
-}
-
-deleteProduct()
-
-function confirmOrder(){
-
-}
-
-
-function cancelOrder(){
-
-}
-
-
-// function payment(){
-//     // isCreditCard(str)
-//     const Publishable_key = pk_test_51K2NpfA08jxyobg1I3QFwJJsmEsxWqAYxcwExBdOoJ5DLnxq1jZfy8xMhpqsd4TGHqosY6I8KwNS2cptJEpNyqEV00BJJRoaHe
-//     const Secret_key = sk_test_51K2NpfA08jxyobg1job46kv5WXwO29CMY6IMTmj2UVlbmpERzTeUcfMoeXUUYdaVU713axUyquPAzeC27F0ZSEOZ00KL8ltUCb
-// }
 
 
 module.exports = userRouter

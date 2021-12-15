@@ -35,6 +35,8 @@ const userSchema = new mongoose.Schema({
     } , role : {
         required : true , 
         type : String
+    } , profile_picture : {
+        type : Buffer 
     } , tokens : [{
         token : {
             type : String , 

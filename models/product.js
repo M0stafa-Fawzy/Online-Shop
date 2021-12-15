@@ -13,6 +13,8 @@ const productSchema = new mongoose.Schema({
     } , vendor : {
         type : mongoose.Schema.Types.ObjectId , 
         ref : 'users'
+    } , photo : {
+        type : Buffer
     }
 } , {
     timestamps : true
