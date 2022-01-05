@@ -120,7 +120,7 @@ getProfilePic()
 
 
 function getProfile(){
-    userRouter.get('/users/profile' , auth , async (req , res) => {
+    userRouter.get('/users/me' , auth , async (req , res) => {
         try{
             res.status(200).send(req.user)
         }catch(e){
