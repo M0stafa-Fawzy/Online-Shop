@@ -1,28 +1,9 @@
 const app = require('../src/app')
 const request = require('supertest')
 const Users = require('../models/user')
-const mongoose = require('mongoose')
-const jwt = require('jsonwebtoken')
+const {user1Id, user1,  setUpDB} = require('./assets/db')
 
-const user1Id = new mongoose.Types.ObjectId() 
-console.log(user1Id)
-
-const user1 = ({
-    _id : user1Id , 
-    name : "Klopp" , 
-    email : "Klopp@example.com" ,
-    phoneNumber : "01123226955" , 
-    password: "thisismyPass758@!" ,
-    role : "vendor" , 
-    tokens : [{
-        token : jwt.sign({_id : user1Id } , process.env.JWT_KEY)
-    }]
-})
-
-beforeEach( async () => {
-    await Users.deleteMany()
-    await new Users(user1).save()
-})
+beforeEach(setUpDB)
 
 test('/should sign up' , async () => {
     const response = await request(app)
@@ -49,18 +30,8 @@ test('should login' , async () => {
     })
     .expect(200)
 
-    const user = await Users.findById(user1._id)
+    const user = await Users.findById(response.body.user._id)
     expect(response.body.token).toBe(user.tokens[1].token)
-})
-
-test('should not login' , async () => {
-    await request(app)
-    .post('/login')
-    .send({
-        email : user1.email , 
-        password :' user1.password'
-    })
-    .expect(400)
 })
 
 test('should log out' , async () => {
@@ -70,19 +41,34 @@ test('should log out' , async () => {
     .send()
     .expect(200)
 
-    // const user = await Users.findById(user1Id)
-    // const check = user.tokens.filter( (token) => {
-    //     return token.token !== user1.tokens[0].token
-    // })
-    // expect(check.length).toBe(0)
+    const user = await Users.findById(user1Id)
+    const check = user.tokens.filter( (token) => {
+        return token.token !== user1.tokens[0].token
+    })
+    expect(check.length).toBe(0)
+})
+
+
+test('should log out all', async () => {
+    const response = await request(app)
+    .post('/logoutAll')
+    .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
+    .send()
+    .expect(200)
+
+    const user = await Users.findById(user1._id)
+    expect(user.tokens.length).toBe(0)
 })
 
 test('should get profile' , async () => {
-    await request(app)
+    const response = await request(app)
     .get('/users/profile')
     .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
     .send()
     .expect(200)
+
+    const user = await Users.findById(response.body._id)
+    expect(user).not.toBeNull()
 })
 
 test('should delete profile' , async () => {
@@ -91,4 +77,36 @@ test('should delete profile' , async () => {
     .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
     .send()
     .expect(200)
+
+    const user = await Users.findById(user1._id)
+    expect(user).toBeNull()
 })
+
+
+test('should update profile', async () => {
+    const response = await request(app)
+    .patch('/users')
+    .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
+    .send({
+        name: 'New Name',
+        email: 'newemail@example.com'
+
+    })
+    .expect(200)
+
+    const user = await Users.findById(response.body._id)
+    expect(user.name).toEqual('New Name')
+})
+
+test('should add profile picture', async () => {
+    const response = await request(app)
+    .post('/profile/profilepicture')
+    .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
+    .attach('profilepicture', 'tests/assets/gerrard.jpg')
+    .expect(200)
+
+    // toEqual uses == not ===
+    const user = await Users.findById(user1Id)
+    expect(user.profile_picture).toEqual(expect.any(Buffer))
+})
+

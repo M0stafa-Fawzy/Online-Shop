@@ -1,8 +1,8 @@
-require('../src/db/mongoose')
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Products = require('./product')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -38,18 +38,40 @@ const userSchema = new mongoose.Schema({
     } , profile_picture : {
         type : Buffer 
     } , tokens : [{
-        token : {
-            type : String , 
-            required : true
+        token: {
+            type: String,
+            required: true
         }
     }] , carts : [{
         cart : {
             type : mongoose.Schema.Types.ObjectId , 
             ref : 'products'
         }
+    }], photos :[{
+        photo: {
+            type: Buffer
+        }
     }]
 }, {
     timestamps: true
+})
+
+userSchema.methods.toJSON = function () {
+
+    const user = this.toObject()
+    delete user.password
+    delete user.tokens
+    delete user.profile_picture
+    delete user.photos
+    delete user.carts
+
+    return user
+}
+
+userSchema.virtual('products' , {
+    ref : 'products' ,
+    localField : '_id' , // what the local field equal here !! of curse id because we pass it as vendor
+    foreignField : 'vendor' // field name which create the relationship
 })
 
 userSchema.statics.findUser = async(email , password) =>{
@@ -65,17 +87,21 @@ userSchema.statics.findUser = async(email , password) =>{
 }
 
 userSchema.methods.generateAuthToken = async function () {
-    const token = jwt.sign({_id : this._id.toString()} , 'onlineShopJWT')
+    const token = jwt.sign({_id : this._id.toString()} , process.env.JWT_KEY) // , {expirseIn : '2 days' '1 second'}
     this.tokens = this.tokens.concat({token})
     await this.save()
     return token
-
 }
 
 userSchema.pre('save' , async function (next) {
     if(this.isModified('password')){
         this.password = await bcrypt.hash(this.password , 8)
     }
+    next()
+})
+
+userSchema.pre('remove' , async function (next) {
+    await Products.deleteMany({vendor: this._id})
     next()
 })
 

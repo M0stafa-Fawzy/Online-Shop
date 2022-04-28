@@ -1,0 +1,20 @@
+h1 {
+    color:  brown;
+    text-align: center;
+}
+
+form {
+    width: 20px;
+    padding: 10px;
+    margin: 20px 300px;
+}
+
+a:hover {
+    color: blue;
+    text-decoration: none;
+}
+
+a:active {
+    color: red;
+    text-decoration: none;
+}

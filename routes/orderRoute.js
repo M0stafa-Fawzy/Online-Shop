@@ -1,5 +1,6 @@
 const Users = require('../models/user')
 const Products = require('../models/product')
+const Orders = require('../models/order')
 const express = require('express')
 const auth = require('../src/middlewares/auth')
 const orderRouter = new express.Router()
@@ -7,9 +8,9 @@ const orderRouter = new express.Router()
 function makeAnOrder () {
     orderRouter.post('/order/:id' , auth , async (req , res) => {
         try{
-            const product = await Products.findOne({_id : req.params.id})
+            const product = await Products.findById(req.params.id)
             if(!product){
-                res.status(404).send('Product Not Found')
+                return res.status(404).send('Product Not Found')
             }
             const order = new Orders({
                 user : req.user._id , 
@@ -24,6 +25,24 @@ function makeAnOrder () {
 }
 
 makeAnOrder ()
+
+
+function getOrders () {
+    orderRouter.get('/orders' , auth, async (req , res) => {
+        try{
+            const orders = await Orders.find({user: req.user._id})
+            if(orders.length === 0){
+                return res.status(404).send()
+            }
+            res.status(200).send(orders)
+        }catch(e){
+            res.status(400).send(e)
+        }
+    })
+}
+
+getOrders ()
+
 
 function addToCart(){
     orderRouter.post('/carts/:id' , auth , async (req , res)=> {
