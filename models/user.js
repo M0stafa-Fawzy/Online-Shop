@@ -105,6 +105,24 @@ userSchema.pre('remove' , async function (next) {
     next()
 })
 
+// access the updated document before update
+// userSchema.pre("findOneAndUpdate", async function () {
+//   const docToUpdate = await Users.findOne(this.getQuery());
+//   // const docToUpdate = await this.model.findOne(this.getQuery());
+//   console.log(docToUpdate); // The document that `findOneAndUpdate()` will modify
+// });
+
+// access the new values during the update
+// userSchema.pre("findOneAndUpdate", async function (next) {
+//   if (this._update.Password) {
+//     this._update.Password = await bcrypt.hash(this._update.Password, 10);
+//   }
+//   if (this._update.Email) {
+//     this._update.Email = this._update.Email.toLowerCase();
+//   }
+//   next();
+// });
+
 
 const Users = mongoose.model('users',userSchema )
 
