@@ -4,7 +4,7 @@ const sharp = require("sharp");
 const Users = require("../models/user");
 const Products = require("../models/product");
 const auth = require("../src/middlewares/auth");
-const upload = require("../src/middlewares/upload");
+const { upload, uploadWithCloud } = require("../src/middlewares/upload");
 const userRouter = new express.Router();
 // const mongoose = require('mongoose')
 // const jwt = require('jsonwebtoken')
@@ -146,7 +146,7 @@ function uploadProfilePic() {
 uploadProfilePic();
 
 function uploadProfilePicWithCloud() {
-  userRouter.post("/profile/profilepicturewithcloud",auth,upload.single("profilepicture"),async (req, res) => {
+  userRouter.post("/profile/profilepicturewithcloud",auth,uploadWithCloud.single("profilepicture"),async (req, res) => {
   const cloudinary = require("cloudinary").v2;
 
   cloudinary.config({
