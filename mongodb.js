@@ -1,3 +1,35 @@
+// let arr = [1,2,3,4,5]
+// Array.prototype.myFilter = function (cb) {
+//   let newArr = []
+//   for(let i = 0 ; i < this.length ; i++ ){
+//     let e = cb(this[i])
+//     if(e === true){
+//       newArr.push(this[i])
+//     }
+//   }
+//   return newArr
+// }
+// arr = arr.myFilter((e) => {
+//   return e < 2
+// })
+// console.log(arr);
+
+
+// let arr = [1,2,3,4,5]
+// Array.prototype.myMap = function (cb) {
+//   let newArr = []
+//   for(let i = 0 ; i < this.length ; i++ ){
+//     let e = cb(this[i])
+//     newArr.push(e)
+//   }
+//   return newArr
+// }
+// arr = arr.myMap((e) => {
+//   return e >= 2
+// })
+// console.log(arr);
+
+
 //const { mongodb , ObjectID } = require('mongodb')
 
 const mongodb = require('mongodb')
