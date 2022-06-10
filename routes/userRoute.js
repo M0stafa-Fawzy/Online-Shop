@@ -159,7 +159,7 @@ function uploadProfilePicWithCloud() {
     .upload(req.file.path)
     .then((d) => console.log(d))
     .catch((e) => console.log(e));
-  res.status(200)send("upload done");
+  res.status(200).send("upload done");
     },
     (error, req, res, next) => {
       res.status(400).send(error.message);
