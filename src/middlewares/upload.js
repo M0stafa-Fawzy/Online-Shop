@@ -46,6 +46,6 @@ const upload = multer({
 // }
 
 module.exports = {
-upload, 
-  uploadWithCloud 
+  upload, 
+  // uploadWithCloud 
 };

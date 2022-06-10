@@ -1,7 +1,7 @@
 const Products = require('../models/product')
 const express = require('express')
 const auth = require('../src/middlewares/auth')
-const upload = require('../src/middlewares/upload')
+const {upload} = require('../src/middlewares/upload')
 const sharp = require('sharp')
 const productRouter = new express.Router()
 
