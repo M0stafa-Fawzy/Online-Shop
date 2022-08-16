@@ -11,14 +11,15 @@ app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "./views"));
 hbs.registerPartials(path.join(__dirname, "./partials"));
 
-const userRouter = require("../routes/userRoute");
-const productRouter = require("../routes/productRoute");
-const orderRouter = require("../routes/orderRoute");
-// const multer = require('multer')
-// const axios = require('axios')
-app.use(userRouter);
-app.use(productRouter);
-app.use(orderRouter);
+const user = require("../routes/user");
+const product = require("../routes/product");
+const order = require("../routes/order");
+const errorHandler = require("./middlewares/errorHandler")
+
+app.use(user);
+app.use(product);
+app.use(order);
+app.use(errorHandler)
 
 app.get("/", async (req, res) => {
   res.render("index");

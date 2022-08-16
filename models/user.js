@@ -37,12 +37,7 @@ const userSchema = new mongoose.Schema({
         type : String
     } , profile_picture : {
         type : Buffer 
-    } , tokens : [{
-        token: {
-            type: String,
-            required: true
-        }
-    }] , carts : [{
+    } , carts : [{
         cart : {
             type : mongoose.Schema.Types.ObjectId , 
             ref : 'products'
@@ -60,9 +55,7 @@ userSchema.methods.toJSON = function () {
 
     const user = this.toObject()
     delete user.password
-    delete user.tokens
     delete user.profile_picture
-    delete user.photos
     delete user.carts
 
     return user
@@ -86,10 +79,8 @@ userSchema.statics.findUser = async(email , password) =>{
     return user
 }
 
-userSchema.methods.generateAuthToken = async function () {
+userSchema.methods.generateAuthToken = function () {
     const token = jwt.sign({_id : this._id.toString()} , process.env.JWT_KEY) // , {expirseIn : '2 days' '1 second'}
-    this.tokens = this.tokens.concat({token})
-    await this.save()
     return token
 }
 
@@ -100,7 +91,7 @@ userSchema.pre('save' , async function (next) {
     next()
 })
 
-userSchema.pre('remove' , async function (next) {
+userSchema.pre('findByIdAndDelete' , async function (next) {
     await Products.deleteMany({vendor: this._id})
     next()
 })
