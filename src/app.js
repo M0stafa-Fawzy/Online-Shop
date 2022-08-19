@@ -16,9 +16,9 @@ const product = require("../routes/product");
 const order = require("../routes/order");
 const errorHandler = require("./middlewares/errorHandler")
 
-app.use(user);
-app.use(product);
-app.use(order);
+app.use("/users", user);
+app.use("/products", product);
+app.use("/orders", order);
 app.use(errorHandler)
 
 app.get("/", async (req, res) => {

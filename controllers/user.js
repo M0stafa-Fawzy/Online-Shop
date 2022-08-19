@@ -1,15 +1,17 @@
 const User = require("../models/user")
+const cloudinary = require("cloudinary").v2;
 
 const signUp = async (req, res) => {
     try {
         const { name, email, password, phoneNumber, role } = req.body
-        const user = User.create({
+        const user = new User({
             name, 
             email, 
             password, 
             phoneNumber, 
             role
         });
+        await user.save()
         if(!user) return res.status(400).json({ message: "failed to signup!" });
 
         const token = user.generateAuthToken();
@@ -76,8 +78,22 @@ const updateProfile = async (req, res) => {
 const uploadProfilePic = async (req, res) => {
     try {
         const { user, file } = req
-        const pic = await sharp(file.buffer).resize({ width: 250, height: 250 }).png().toBuffer();
+        let { profile_picture } = user
 
+        cloudinary.config({
+            cloud_name: process.env.cloud_name,
+            api_key: process.env.api_key,
+            api_secret: process.env.api_secret,
+        });
+
+        const { public_id, secure_url } = await cloudinary.uploader.upload(file.path)
+        profile_picture = {
+            public_id,
+            secure_url
+        }
+
+        await user.save()
+        if(!public_id || !secure_url) return res.status(400).json({ message: "uploaded failed" });
         return res.status(200).json({ message: "uploaded successfully" });
     } catch (error) {
         return res.status(400).json({message: error.message})

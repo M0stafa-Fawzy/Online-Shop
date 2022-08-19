@@ -36,15 +36,15 @@ const userSchema = new mongoose.Schema({
         required : true , 
         type : String
     } , profile_picture : {
-        type : Buffer 
+            public_id: {
+                type: String
+            }, secure_url: {
+                type: String
+            }
     } , carts : [{
         cart : {
             type : mongoose.Schema.Types.ObjectId , 
             ref : 'products'
-        }
-    }], photos :[{
-        photo: {
-            type: Buffer
         }
     }]
 }, {
@@ -80,7 +80,7 @@ userSchema.statics.findUser = async(email , password) =>{
 }
 
 userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({_id : this._id.toString()} , process.env.JWT_KEY) // , {expirseIn : '2 days' '1 second'}
+    const token = jwt.sign({_id : this._id.toString()} , process.env.JWT_KEY)
     return token
 }
 
