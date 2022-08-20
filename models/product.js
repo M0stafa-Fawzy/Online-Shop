@@ -13,9 +13,12 @@ const productSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId , 
         required : true ,
         ref : 'users'
-    } , photo : {
-        type : Buffer
-    }
+    } , photos : [{
+        photo: {
+            secure_url: String,
+            public_id: String
+        }
+    }]
 } , {
     timestamps : true
 })

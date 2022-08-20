@@ -6,7 +6,7 @@ const {
     getProductsPerVendor,
     getAllProducts,
     getSingleProduct,
-    uploadProductPhoto,
+    uploadMultiPleProductPhotos,
     updateProduct,
     deleteProduct
 } = require("../controllers/product")
@@ -14,7 +14,7 @@ const {
 router.post("/", auth, AddProduct)
 router.post("/", auth, getProductsPerVendor)
 router.get("/", getAllProducts)
-router.post("/upload", auth, upload.single("photo"), uploadProductPhoto)
+router.post("/upload/:id", auth, upload.array("photos"), uploadMultiPleProductPhotos)
 router.route("/:id").get(getSingleProduct).put(auth, updateProduct).delete(auth, deleteProduct)
 
 module.exports = router

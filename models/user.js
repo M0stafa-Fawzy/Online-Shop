@@ -36,11 +36,8 @@ const userSchema = new mongoose.Schema({
         required : true , 
         type : String
     } , profile_picture : {
-            public_id: {
-                type: String
-            }, secure_url: {
-                type: String
-            }
+            public_id: String, 
+            secure_url: String
     } , carts : [{
         cart : {
             type : mongoose.Schema.Types.ObjectId , 

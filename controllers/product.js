@@ -1,16 +1,18 @@
 const Product = require("../models/product")
+const cloudinary = require("cloudinary").v2;
+
 const AddProduct = async (req, res) => {
     try {
         const { role, _id } = req.user
 
         if (role === 'vendor') {
             const { name, price, detailes } = req.body
-            const product = Product.create({
+            const product = await new Product({
                 name, 
                 price, 
                 detailes,
                 vendor: _id
-            })
+            }).save()
 
             if(!product) return res.status(400).json({ message: "failed to add a aproduct" })
             return res.status(201).json({ product })
@@ -99,19 +101,34 @@ const getSingleProduct = async (req, res) => {
     }
 }
 
-const uploadProductPhoto = async (req, res) => {
+const uploadMultiPleProductPhotos = async (req, res) => {
     try {
         const { id } = req.params
         const { _id } = req.user
-        const { file } = req.file
+        const { files } = req
 
         const product = await Product.findOne({_id: id, vendor: _id})
         if(!product){
             return res.status(200).json({ message: 'product not found' })
         }
+        let { photos } = product
 
-        const pic = await sharp(file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-        return res.status(200).json({ message: "photo uploded successfully" })
+        cloudinary.config({
+            cloud_name: process.env.cloud_name,
+            api_key: process.env.api_key,
+            api_secret: process.env.api_secret,
+        });
+
+        for(i in files) {
+            const { public_id, secure_url } = await cloudinary.uploader.upload(files[i].path)
+            if(!public_id || !secure_url){
+                return res.status(200).json({ message: "failed to upload photos please try again later" })
+            } 
+            photos.push({ photo: { public_id, secure_url }})
+            await product.save()
+        }
+
+        return res.status(200).json({ message: "photos uploded successfully" })
     } catch (error) {
         return res.status(400).json({ message: error.message })
     }
@@ -153,7 +170,7 @@ module.exports = {
     getProductsPerVendor,
     getAllProducts,
     getSingleProduct,
-    uploadProductPhoto,
+    uploadMultiPleProductPhotos,
     updateProduct,
     deleteProduct
 }

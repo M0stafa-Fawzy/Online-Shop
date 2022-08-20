@@ -78,7 +78,6 @@ const updateProfile = async (req, res) => {
 const uploadProfilePic = async (req, res) => {
     try {
         const { user, file } = req
-        let { profile_picture } = user
 
         cloudinary.config({
             cloud_name: process.env.cloud_name,
@@ -87,7 +86,7 @@ const uploadProfilePic = async (req, res) => {
         });
 
         const { public_id, secure_url } = await cloudinary.uploader.upload(file.path)
-        profile_picture = {
+        user.profile_picture = {
             public_id,
             secure_url
         }
