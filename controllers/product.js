@@ -3,22 +3,17 @@ const cloudinary = require("cloudinary").v2;
 
 const AddProduct = async (req, res) => {
     try {
-        const { role, _id } = req.user
+        const { _id } = req.user
+        const { name, price, detailes } = req.body
+        const product = await new Product({
+            name, 
+            price, 
+            detailes,
+            vendor: _id
+        }).save()
 
-        if (role === 'vendor') {
-            const { name, price, detailes } = req.body
-            const product = await new Product({
-                name, 
-                price, 
-                detailes,
-                vendor: _id
-            }).save()
-
-            if(!product) return res.status(400).json({ message: "failed to add a aproduct" })
-            return res.status(201).json({ product })
-        } else {
-            return res.status(401).send('Sorry! Only Vendor Can Add a Product')
-        }
+        if(!product) return res.status(400).json({ message: "failed to add a aproduct" })
+        return res.status(201).json({ product })
     } catch (error) {
         return res.status(400).json({ message: error.message })
     }
@@ -30,33 +25,29 @@ const getProductsPerVendor = async (req, res) => {
         const { role } = user
         const { name, sortBy, limit, skip } = req.query
 
-        if (role === 'vendor') {
-            const match = {}
-            const sort = {}
+        const match = {}
+        const sort = {}
 
-            if (name) {
-                match.name = name
-            }
-
-            if (sortBy) {
-                const parts = sortBy.split(':')
-                sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
-            }
-
-            await user.populate({
-                path: 'products',
-                match,
-                options: {
-                    limit: parseInt(limit),
-                    skip: parseInt(skip),
-                    sort
-                }
-            })
-
-            return res.status(200).json({ products: user.products })
-        }else{
-            return res.status(400).send()
+        if (name) {
+            match.name = name
         }
+
+        if (sortBy) {
+            const parts = sortBy.split(':')
+            sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+        }
+
+        await user.populate({
+            path: 'products',
+            match,
+            options: {
+                limit: parseInt(limit),
+                skip: parseInt(skip),
+                sort
+            }
+        })
+
+        return res.status(200).json({ products: user.products })
     } catch (error) {
         return res.status(400).json({ message: error.message })
     }

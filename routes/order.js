@@ -1,4 +1,4 @@
-const auth = require('../src/middlewares/auth')
+const { auth } = require('../src/middlewares/auth')
 const router = require('express').Router()
 const { 
     makeAnOrder,

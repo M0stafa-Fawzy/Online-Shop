@@ -20,4 +20,19 @@ const auth = async (req , res , next) => {
     
 }
 
-module.exports = auth
+const isVendor = async (req, res, next) => {
+    try {
+        const { role } = req.user
+        if(role != 'vendor'){
+            return res.status(401).json({ message: "only vendors can perform this action" })
+        }
+        next()
+    } catch (error) {
+        return res.status(400).json({ message: error.message })
+    }
+}
+
+module.exports = {
+    auth,
+    isVendor
+}

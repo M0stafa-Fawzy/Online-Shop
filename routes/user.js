@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { upload } = require("../src/middlewares/upload")
-const auth = require("../src/middlewares/auth");
+const { auth } = require("../src/middlewares/auth");
 const { 
   signUp,
   login,
