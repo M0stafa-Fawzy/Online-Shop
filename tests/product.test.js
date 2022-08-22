@@ -24,7 +24,7 @@ test('should create a product', async () => {
 
 test('should fetch products for vendor', async () => {
     const response = await request(app)
-    .get('/profile/products')
+    .get('/products')
     .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
     .send()
     .expect(200)
@@ -34,7 +34,7 @@ test('should fetch products for vendor', async () => {
 
 test('should fetch all products', async () => {
     const response = await request(app)
-    .get('/products')
+    .get('/all')
     .send()
     .expect(200)
 

@@ -12,8 +12,8 @@ const {
 } = require("../controllers/product")
 
 router.post("/", auth, isVendor, AddProduct)
-router.post("/", auth, isVendor, getProductsPerVendor)
-router.get("/", getAllProducts)
+router.get("/", auth, isVendor, getProductsPerVendor)
+router.get("/all", getAllProducts)
 router.post("/upload/:id", auth, upload.array("photos"), uploadMultiPleProductPhotos)
 router.route("/:id").get(getSingleProduct).put(auth, isVendor, updateProduct).delete(auth, isVendor, deleteProduct)
 

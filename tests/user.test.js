@@ -23,7 +23,7 @@ test('/should sign up' , async () => {
 
 test('should login' , async () => {
     const response = await request(app)
-    .post('/login')
+    .post('/users/login')
     .send({
         email : user1.email , 
         password : user1.password
@@ -34,35 +34,9 @@ test('should login' , async () => {
     expect(response.body.token).toBe(user.tokens[1].token)
 })
 
-test('should log out' , async () => {
-    const response = await request(app)
-    .post('/logout')
-    .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
-    .send()
-    .expect(200)
-
-    const user = await Users.findById(user1Id)
-    const check = user.tokens.filter( (token) => {
-        return token.token !== user1.tokens[0].token
-    })
-    expect(check.length).toBe(0)
-})
-
-
-test('should log out all', async () => {
-    const response = await request(app)
-    .post('/logoutAll')
-    .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
-    .send()
-    .expect(200)
-
-    const user = await Users.findById(user1._id)
-    expect(user.tokens.length).toBe(0)
-})
-
 test('should get profile' , async () => {
     const response = await request(app)
-    .get('/users/profile')
+    .get('/users')
     .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
     .send()
     .expect(200)
@@ -73,7 +47,7 @@ test('should get profile' , async () => {
 
 test('should delete profile' , async () => {
     await request(app)
-    .delete('/users/profile')
+    .delete('/users')
     .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
     .send()
     .expect(200)
@@ -100,7 +74,7 @@ test('should update profile', async () => {
 
 test('should add profile picture', async () => {
     const response = await request(app)
-    .post('/profile/profilepicture')
+    .post('/users/upload')
     .set('Authorization' , `Bearer ${user1.tokens[0].token}`)
     .attach('profilepicture', 'tests/assets/gerrard.jpg')
     .expect(200)
