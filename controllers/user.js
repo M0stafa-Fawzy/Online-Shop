@@ -90,9 +90,9 @@ const uploadProfilePic = async (req, res) => {
             public_id,
             secure_url
         }
-
-        await user.save()
         if(!public_id || !secure_url) return res.status(400).json({ message: "uploaded failed" });
+        
+        await user.save()
         return res.status(200).json({ message: "uploaded successfully" });
     } catch (error) {
         return res.status(400).json({message: error.message})
