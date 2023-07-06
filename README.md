@@ -1,2 +1,2 @@
 # Online-Shop
-a simple online chart
+a simple online cart
