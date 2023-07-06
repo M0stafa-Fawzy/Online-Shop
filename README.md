@@ -8,8 +8,8 @@ a simple online cart
 4- browse to the root file directory and open cmd  
 5- install dependencies using this command => npm i   
 6- create .env file to hold all environment variables  
-    a- PORT  
-    b- DATA_BASE_URL  
+&emsp; a- PORT  
+&emsp; b- DATA_BASE_URL  
 7- run one of these scripts  
-    a- npm run dev => for development and watching for every code change  
-    b- npm run start  
+&emsp; a- npm run dev => for development and watching for every code change  
+&emsp; b- npm run start  
